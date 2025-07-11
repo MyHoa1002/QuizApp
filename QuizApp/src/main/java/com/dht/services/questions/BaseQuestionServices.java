@@ -6,6 +6,7 @@ package com.dht.services.questions;
 
 import com.dht.pojo.Choice;
 import com.dht.pojo.Question;
+import com.dht.services.BaseServices;
 import com.dht.utils.JdbcConnector;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -18,21 +19,11 @@ import java.util.List;
  *
  * @author admin
  */
-public abstract class BaseQuestionServices {
+public abstract class BaseQuestionServices extends BaseServices<Question> {
     public abstract String getSQL(List<Object> params);
-    
-    public List<Question> list() throws SQLException {
-        Connection conn = JdbcConnector.getInstance().connect();
-        
-        // *****
-        List<Object> params = new ArrayList<>();
-        PreparedStatement stm = conn.prepareCall(this.getSQL(params));
-        for (int i = 0; i < params.size(); i++)
-            stm.setObject(i + 1, params.get(i));
-        // *****
-        
-        ResultSet rs = stm.executeQuery();
 
+    @Override
+    public List<Question> getResults(ResultSet rs) throws SQLException {
         List<Question> questions = new ArrayList<>();
         while (rs.next()) {
             int id = rs.getInt("id");
@@ -41,7 +32,18 @@ public abstract class BaseQuestionServices {
             
             questions.add(q);
         }
+        
         return questions;
+    }
+
+    @Override
+    public PreparedStatement getStatement(Connection conn) throws SQLException {
+        List<Object> params = new ArrayList<>();
+        PreparedStatement stm = conn.prepareCall(this.getSQL(params));
+        for (int i = 0; i < params.size(); i++)
+            stm.setObject(i + 1, params.get(i));
+        
+        return stm;
     }
     
     public List<Choice> getChoicesByQuestionId(int questionId) throws SQLException {

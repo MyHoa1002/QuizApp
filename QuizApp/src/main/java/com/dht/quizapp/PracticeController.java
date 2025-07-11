@@ -7,12 +7,14 @@ package com.dht.quizapp;
 import com.dht.pojo.Category;
 import com.dht.pojo.Level;
 import com.dht.pojo.Question;
+import com.dht.services.FlyweightFactory;
 import com.dht.services.questions.BaseQuestionServices;
 import com.dht.services.questions.CategoryQuestionServicesDecorator;
 import com.dht.services.questions.LevelQuestionServicesDecorator;
 import com.dht.services.questions.LimitQuestionServicesDecorator;
 import com.dht.services.questions.QuestionServices;
 import com.dht.utils.Configs;
+import com.dht.utils.MyAlert;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
@@ -22,6 +24,7 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.TextField;
@@ -50,8 +53,8 @@ public class PracticeController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         try {
-            this.cbSearchCates.setItems(FXCollections.observableList(Configs.cateServices.getCates()));
-            this.cbSearchLevels.setItems(FXCollections.observableList(Configs.levelServices.getLevels()));
+            this.cbSearchCates.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.cateServices, "categories")));
+            this.cbSearchLevels.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.cateServices, "levels")));
             
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
@@ -73,7 +76,13 @@ public class PracticeController implements Initializable {
             s = new LimitQuestionServicesDecorator(s, Integer.parseInt(this.txtNum.getText()));
         
             this.questions = s.list();
-            loadQuestion();
+            
+            if (this.questions.isEmpty())
+                MyAlert.getInstance().showMsg("Không có các câu hỏi phù hợp!", Alert.AlertType.WARNING);
+            else {
+                this.currentQuestion = 0;
+                loadQuestion();
+            }
         } catch (SQLException ex) {
             
         }
@@ -86,6 +95,7 @@ public class PracticeController implements Initializable {
             this.loadQuestion();
         }
     }
+    
     public void handleCheck(ActionEvent event) {
         Question q = this.questions.get(this.currentQuestion);
         for (int i = 0; i < q.getChoices().size(); i++)
