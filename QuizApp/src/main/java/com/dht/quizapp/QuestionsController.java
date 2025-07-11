@@ -76,10 +76,10 @@ public class QuestionsController implements Initializable {
         try {
             
             this.cbCates.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.cateServices, "categories")));
-            this.cbLevels.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.cateServices, "levels")));
+            this.cbLevels.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.levelServices, "levels")));
             
             this.cbSearchCates.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.cateServices, "categories")));
-            this.cbSearchLevels.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.cateServices, "levels")));
+            this.cbSearchLevels.setItems(FXCollections.observableList(FlyweightFactory.getData(Configs.levelServices, "levels")));
             
             this.loadColumns();
             this.loadQuestion(Configs.questionServices.list());
