@@ -6,7 +6,9 @@ package com.dht.utils;
 
 import com.dht.services.CategoryServices;
 import com.dht.services.LevelServices;
-import com.dht.services.QuestionServices;
+import com.dht.services.questions.QuestionServices;
+import com.dht.services.questions.UpdateQuestionServices;
+import com.dht.services.questions.BaseQuestionServices;
 
 /**
  *
@@ -15,7 +17,10 @@ import com.dht.services.QuestionServices;
 public class Configs {
 
     public static final CategoryServices cateServices = new CategoryServices();
-    public static final QuestionServices questionServices = new QuestionServices();
+    
     public static final LevelServices levelServices = new LevelServices();
+    
+    public static final UpdateQuestionServices uQServices = new UpdateQuestionServices();
+    public static  BaseQuestionServices questionServices = new QuestionServices();
     
 }

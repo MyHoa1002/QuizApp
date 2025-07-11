@@ -10,7 +10,11 @@ import com.dht.pojo.Level;
 import com.dht.pojo.Question;
 import com.dht.services.CategoryServices;
 import com.dht.services.LevelServices;
-import com.dht.services.QuestionServices;
+import com.dht.services.questions.BaseQuestionServices;
+import com.dht.services.questions.CategoryQuestionServicesDecorator;
+import com.dht.services.questions.KeywordQuestionServicesDecorator;
+import com.dht.services.questions.LevelQuestionServicesDecorator;
+import com.dht.services.questions.QuestionServices;
 import com.dht.utils.Configs;
 import com.dht.utils.JdbcConnector;
 import com.dht.utils.MyAlert;
@@ -52,7 +56,9 @@ import javafx.scene.layout.VBox;
 public class QuestionsController implements Initializable {
     @FXML private TextArea txtContent;
     @FXML private ComboBox<Category> cbCates;
+    @FXML private ComboBox<Category> cbSearchCates;
     @FXML private ComboBox<Level> cbLevels;
+    @FXML private ComboBox<Level> cbSearchLevels;
     @FXML private TableView<Question> tbQuestions;
     @FXML private VBox vboxChoices;
     @FXML private TextField txtSearch;
@@ -70,15 +76,37 @@ public class QuestionsController implements Initializable {
             this.cbCates.setItems(FXCollections.observableList(Configs.cateServices.getCates()));
             this.cbLevels.setItems(FXCollections.observableList(Configs.levelServices.getLevels()));
             
+            this.cbSearchCates.setItems(FXCollections.observableList(Configs.cateServices.getCates()));
+            this.cbSearchLevels.setItems(FXCollections.observableList(Configs.levelServices.getLevels()));
+            
             this.loadColumns();
-            this.loadQuestion(Configs.questionServices.getQuestions());
+            this.loadQuestion(Configs.questionServices.list());
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
         }
         
         this.txtSearch.textProperty().addListener((e) -> {
             try {
-                this.loadQuestion(Configs.questionServices.getQuestions(this.txtSearch.getText()));
+                BaseQuestionServices s = new KeywordQuestionServicesDecorator(Configs.questionServices, this.txtSearch.getText());
+                this.loadQuestion(s.list());
+            } catch (SQLException ex) {
+                Logger.getLogger(QuestionsController.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            }
+        });
+        
+        this.cbSearchCates.getSelectionModel().selectedItemProperty().addListener(e -> {
+            try {
+                BaseQuestionServices s = new CategoryQuestionServicesDecorator(Configs.questionServices, this.cbSearchCates.getSelectionModel().getSelectedItem());
+                this.loadQuestion(s.list());
+            } catch (SQLException ex) {
+                Logger.getLogger(QuestionsController.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            }
+        });
+        
+        this.cbSearchLevels.getSelectionModel().selectedItemProperty().addListener(e -> {
+            try {
+                BaseQuestionServices s = new LevelQuestionServicesDecorator(Configs.questionServices, this.cbSearchLevels.getSelectionModel().getSelectedItem());
+                this.loadQuestion(s.list());
             } catch (SQLException ex) {
                 Logger.getLogger(QuestionsController.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
             }
@@ -113,7 +141,7 @@ public class QuestionsController implements Initializable {
                 b.addChoice(choice);
             }
             
-            Configs.questionServices.addQuestion(b.build());
+            Configs.uQServices.addQuestion(b.build());
             MyAlert.getInstance().showMsg("Thêm câu hỏi thành công!");
             
             // Bổ sung
@@ -146,7 +174,7 @@ public class QuestionsController implements Initializable {
                 if (t.isPresent() && t.get().equals(ButtonType.OK)) {
                     Question q = (Question) cell.getTableRow().getItem();
                     try {
-                        Configs.questionServices.deleteQuestion(q.getId());
+                        Configs.uQServices.deleteQuestion(q.getId());
                         
                         this.tbQuestions.getItems().remove(q);
                         MyAlert.getInstance().showMsg("Xóa thành công!");

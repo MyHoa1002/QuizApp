@@ -12,6 +12,10 @@ public class Level {
     private int id;
     private String name;
     private String note;
+    
+    public Level(int id) {
+        this.id = id;
+    }
 
     public Level(int id, String name, String note) {
         this.id = id;
